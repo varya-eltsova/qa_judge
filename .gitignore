@@ -1,0 +1,9 @@
+env/
+
+.env
+
+*.db
+evaluations.db
+
+__pycache__/
+*.pyc
