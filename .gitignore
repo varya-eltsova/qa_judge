@@ -1,3 +1,5 @@
+.vs
+
 env/
 
 .env
@@ -7,3 +9,4 @@ evaluations.db
 
 __pycache__/
 *.pyc
+

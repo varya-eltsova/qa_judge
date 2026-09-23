@@ -1,33 +1,30 @@
-import sqlite3
-import json
-from app.schemas import EvaluationRequest, EvaluationResult
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float
+from sqlalchemy.orm import declarative_base, sessionmaker
+from datetime import datetime, timezone
 
-DB_FILE = "evaluations.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./evaluations.db"
 
-def init_db():
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                user_query TEXT,
-                bot_response TEXT,
-                accuracy INTEGER,
-                tone INTEGER,
-                verdict TEXT,
-                errors TEXT,
-                recommendation TEXT
-            )
-        """)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def save_result(req: EvaluationRequest, res: EvaluationResult):
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.execute("""
-            INSERT INTO logs (user_query, bot_response, accuracy, tone, verdict, errors, recommendation)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            req.user_query, req.bot_response,
-            res.accuracy_score, res.tone_score,
-            res.verdict, json.dumps(res.errors, ensure_ascii=False),
-            res.recommendation
-        ))
+Base = declarative_base()
+
+class Log(Base):
+    __tablename__ = "logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    user_query = Column(String)
+    bot_response = Column(String)
+    accuracy = Column(Integer)
+    tone = Column(Integer)
+    verdict = Column(String)
+    errors = Column(String)
+    average_score = Column(Float)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

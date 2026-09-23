@@ -1,18 +1,106 @@
-# QA Judge
+# QA Judge Bot
 
-Инструмент для автоматической оценки качества ответов бота с использованием LLM от OpenAI. 
+Микросервис на FastAPI для оценки ответа бота, сравнивая вопрос клиента и ответ бота по нескольким критериям, и отдает оценку с вердиктом PASS или FAIL. 
 
-## Стек
-* Python
-* FastAPI
-* Playwright
-* Pydantic
-* SQL
+Оценивает ответ бота LLM. Используется стандартный `openai` SDK, настроенный на `base_url`. Результат проверки сохраняется в SQLite. 
+
+## Используемый стек
+
+- Python
+- FastAPI + Uvicorn - REST API и веб-сервер
+- OpenAI Python SDK - интеграция с LLM (через OpenRouter)
+- Pydantic - валидация запросов и ответов
+- SQLAlchemy - ORM для работы с SQLite
+- SQLite - локальная БД
+- python-dotenv - управление конфигурацией
 
 ## Структура проекта
-* `app` - исходный код:
-  * `main.py` 
-  * `evaluator.py` - логика оценки и взаимодействия с LLM
-  * `schemas.py` - Pydantic-схемы запросов и ответов
-  * `database.py` - настройка БД
-* `qa_judge.py` - скрипт запуска
+
+```text
+qa_judge/
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py         # Точка входа FastAPI, эндпоинт /evaluate
+│   ├── evaluator.py     # Запрос к LLM через OpenRouter и парсинг ответа
+│   ├── schemas.py       # Pydantic-модели EvaluationRequest / EvaluationResult
+│   └── database.py      # Инициализация SQLite и сохранение результатов
+│
+├── .env                  # Секретные ключи (в Git не попадает)
+├── .gitignore
+├── requirements.txt       # Зависимости проекта
+└── README.md
+```
+
+## Развернуть локально 
+
+
+### Клонировать репозиторий
+
+```
+git clone <URL_этого_репозитория>
+cd qa_judge
+```
+
+### Настроить  виртуальное окружение
+
+```
+python -m venv env
+env\Scripts\Activate
+```
+
+### Установить зависимости
+
+```
+pip install -r requirements.txt
+```
+
+### Подготовить .env файл с ключом OpenRouter
+
+Сервис обращается к LLM через OpenRouter (`base_url = https://openrouter.ai/api/v1`),
+поэтому нужен ключ именно с [openrouter.ai/keys](https://openrouter.ai/keys), а не с platform.openai.com.
+
+```
+OPENAI_API_KEY=ваш_ключ_openrouter
+```
+
+
+### Запустить сервер
+
+```
+uvicorn app.main:app --reload
+```
+
+После запуска (Swagger UI) будет  доступна по адресу: http://127.0.0.1:8000/docs
+
+
+##  Пример использования
+
+````
+POST /evaluate
+
+Отправить запрос можно через встроенный Swagger UI (`http://127.0.0.1:8000/docs`), Postman или прямо из терминала с помощью утилиты `curl`:
+
+**Пример запроса (cURL):**
+```
+curl -X 'POST' \
+  '[http://127.0.0.1:8000/evaluate](http://127.0.0.1:8000/evaluate)' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "user_query": "Как восстановить пароль?",
+  "bot_response": "Нажмите кнопку «Забыли пароль» на экране входа.",
+  "reference_context": "Восстановление пароля происходит через форму авторизации."
+}'
+````
+**Успешный ответ (HTTP 200 OK):**
+
+```
+{
+  "accuracy_score": 5,
+  "tone_score": 5,
+  "errors": [],
+  "verdict": "PASS",
+  "average_score": 5.0
+}
+```
