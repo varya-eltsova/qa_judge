@@ -50,7 +50,7 @@ def run_evaluation(data: EvaluationRequest) -> EvaluationResult:
 
         content = f"Вопрос клиента:\n{data.user_query}\n\nОтвет бота:\n{data.bot_response}"
         if data.reference_context:
-            content += f"\n\nЭталонный контекст для проверки:\n{data.reference_context}"
+            content += f"\n\nБаза знаний для проверки:\n{data.reference_context}"
         
         response = client.chat.completions.create(
             model="openai/gpt-4o-mini",
