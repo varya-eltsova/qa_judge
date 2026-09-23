@@ -26,7 +26,8 @@ qa_judge/
 │   ├── schemas.py     
 │   └── database.py      
 │
-├── .env                 
+├── .env
+├── .env.example
 ├── requirements.txt
 └── README.md
 ```
@@ -58,6 +59,12 @@ pip install -r requirements.txt
 
 Сервис обращается к LLM через OpenRouter (`base_url = https://openrouter.ai/api/v1`),
 поэтому нужен ключ именно с [openrouter.ai/keys](https://openrouter.ai/keys), а не с platform.openai.com.
+
+Скопируйте `.env.example` в `.env` и впишите свой ключ:
+
+```
+cp .env.example .env
+```
 
 ```
 OPENAI_API_KEY=ваш_ключ_openrouter
