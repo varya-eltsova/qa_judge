@@ -21,14 +21,13 @@ qa_judge/
 │
 ├── app/
 │   ├── __init__.py
-│   ├── main.py         # Точка входа FastAPI, эндпоинт /evaluate
-│   ├── evaluator.py     # Запрос к LLM через OpenRouter и парсинг ответа
-│   ├── schemas.py       # Pydantic-модели EvaluationRequest / EvaluationResult
-│   └── database.py      # Инициализация SQLite и сохранение результатов
+│   ├── main.py         
+│   ├── evaluator.py   
+│   ├── schemas.py     
+│   └── database.py      
 │
-├── .env                  # Секретные ключи (в Git не попадает)
-├── .gitignore
-├── requirements.txt       # Зависимости проекта
+├── .env                 
+├── requirements.txt
 └── README.md
 ```
 
